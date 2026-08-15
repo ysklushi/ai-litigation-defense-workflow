@@ -308,7 +308,10 @@
         <div class="card">
             <div class="card-header">
                 <span>📝 書狀素材與案件資訊填寫</span>
-                <button type="button" class="btn btn-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="loadSample()">載入範例素材</button>
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" class="btn btn-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="clearForm()">🗑️ 清空表單</button>
+                    <button type="button" class="btn btn-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="loadSample()">🔄 重設為範例</button>
+                </div>
             </div>
 
             <!-- 自爆地雷即時警示窗 -->
@@ -321,11 +324,11 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="court">承辦機關</label>
-                        <input type="text" id="court" value="臺灣臺北地方法院（民事○股）" oninput="updatePreview()">
+                        <input type="text" id="court" placeholder="例：臺灣臺北地方法院（民事○股）" value="臺灣臺北地方法院（民事○股）" oninput="updatePreview()">
                     </div>
                     <div class="form-group">
                         <label for="caseNo">案號</label>
-                        <input type="text" id="caseNo" value="113年度重訴字第1234號" oninput="updatePreview()">
+                        <input type="text" id="caseNo" placeholder="例：199年度○○字第○○○○號" value="199年度○○字第○○○○號" oninput="updatePreview()">
                     </div>
                 </div>
 
@@ -334,7 +337,7 @@
                     <label>原告姓名與送達處所</label>
                     <div id="plaintiffsContainer" class="dynamic-list">
                         <div class="dynamic-item">
-                            <input type="text" class="plaintiff-input" value="張○○　住臺北市中正區重慶南路○段○○○號" oninput="updatePreview()">
+                            <input type="text" class="plaintiff-input" placeholder="原告姓名　住址/處所" value="張○○　住臺北市中正區重慶南路○段○○○號" oninput="updatePreview()">
                         </div>
                     </div>
                     <div class="btn-mini-group">
@@ -348,7 +351,7 @@
                     <label>被告姓名與送達處所</label>
                     <div id="defendantsContainer" class="dynamic-list">
                         <div class="dynamic-item">
-                            <input type="text" class="defendant-input" value="李○○　住新北市板橋區縣民大道○段○○○號" oninput="updatePreview()">
+                            <input type="text" class="defendant-input" placeholder="被告姓名　住址/處所" value="李○○　住新北市板橋區縣民大道○段○○○號" oninput="updatePreview()">
                         </div>
                     </div>
                     <div class="btn-mini-group">
@@ -371,13 +374,13 @@
                     </div>
                     <div class="form-group">
                         <label for="partyName">具狀人姓名（本人簽名，不列律師）</label>
-                        <input type="text" id="partyName" value="張○○" oninput="updatePreview()">
+                        <input type="text" id="partyName" placeholder="例：張○○" value="張○○" oninput="updatePreview()">
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label for="content">陳報意見內文（可直接貼上當事人或經整理後的主張）</label>
-                    <textarea id="content" rows="11" style="font-family: '標楷體', monospace; font-size: 14px;" oninput="onContentInput()"></textarea>
+                    <textarea id="content" rows="11" placeholder="請在此貼上當事人堅持或整理後之陳報意見內文..." style="font-family: '標楷體', monospace; font-size: 14px;" oninput="onContentInput()"></textarea>
                 </div>
 
                 <div class="form-group">
@@ -387,7 +390,7 @@
 
                 <div class="form-group">
                     <label for="attachments">附件清單（每行一項，無附件可留空）</label>
-                    <textarea id="attachments" rows="3" style="font-family: '標楷體', monospace; font-size: 14px;" oninput="updatePreview()"></textarea>
+                    <textarea id="attachments" rows="3" placeholder="每行一項，例：&#10;1、物流送達簽收單影本乙份。&#10;2、通訊軟體對話完整截圖三紙。" style="font-family: '標楷體', monospace; font-size: 14px;" oninput="updatePreview()"></textarea>
                 </div>
 
                 <div class="action-bar">
@@ -470,6 +473,28 @@
             if (inp.value.trim()) list.push(inp.value.trim());
         });
         return list.length > 0 ? list : ['○○○'];
+    }
+
+    // 清空表單所有欄位
+    function clearForm() {
+        document.getElementById('court').value = "";
+        document.getElementById('caseNo').value = "";
+        
+        // 重設原告為單一空白輸入框
+        const pContainer = document.getElementById('plaintiffsContainer');
+        pContainer.innerHTML = '<div class="dynamic-item"><input type="text" class="plaintiff-input" placeholder="原告姓名　住址/處所" value="" oninput="updatePreview()"></div>';
+        
+        // 重設被告為單一空白輸入框
+        const dContainer = document.getElementById('defendantsContainer');
+        dContainer.innerHTML = '<div class="dynamic-item"><input type="text" class="defendant-input" placeholder="被告姓名　住址/處所" value="" oninput="updatePreview()"></div>';
+        
+        document.getElementById('role').value = "原告";
+        document.getElementById('partyName').value = "";
+        document.getElementById('content').value = "";
+        document.getElementById('attachments').value = "";
+        
+        initDate();
+        onContentInput();
     }
 
     // 載入範例
