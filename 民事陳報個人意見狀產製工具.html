@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>民事陳報個人意見狀 自動產製系統</title>
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-hover: #172554;
+            --secondary: #475569;
+            --accent: #dc2626;
+            --warning-bg: #fffbeb;
+            --warning-border: #f59e0b;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --border: #cbd5e1;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft JhengHei", "微軟正黑體", sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 24px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: #ffffff;
+            padding: 20px 28px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1);
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 6px solid var(--primary);
+        }
+
+        header h1 {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        header p {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+
+        @media (max-width: 1024px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid var(--border);
+        }
+
+        .card-header {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 18px;
+            color: var(--primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #f1f5f9;
+            padding-bottom: 12px;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 6px;
+        }
+
+        input[type="text"], select, textarea {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            color: var(--text-main);
+            background-color: #fff;
+            transition: all 0.2s ease;
+        }
+
+        input[type="text"]:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            line-height: 1.5;
+        }
+
+        .alert-box {
+            background-color: var(--warning-bg);
+            border-left: 4px solid var(--warning-border);
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            font-size: 13px;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .alert-box.show {
+            display: block;
+        }
+
+        .alert-title {
+            font-weight: 700;
+            color: #b45309;
+            margin-bottom: 4px;
+        }
+
+        .action-bar {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            flex: 2;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            background-color: #f1f5f9;
+            color: #334155;
+            border: 1px solid #cbd5e1;
+            flex: 1;
+        }
+
+        .btn-secondary:hover {
+            background-color: #e2e8f0;
+        }
+
+        /* 預覽視窗 (司法書狀紙張風格) */
+        .preview-wrapper {
+            background: #e2e8f0;
+            padding: 24px;
+            border-radius: 12px;
+            overflow-x: auto;
+        }
+
+        .paper {
+            background: white;
+            width: 100%;
+            min-height: 700px;
+            padding: 40px 48px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+            font-family: "標楷體", "DFKai-SB", "BiauKai", "TW-Kai", serif;
+            color: black;
+            line-height: 1.5;
+        }
+
+        .paper-title {
+            font-size: 20pt;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20pt;
+            letter-spacing: 2px;
+        }
+
+        .paper-body {
+            font-size: 14pt;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .paper-line {
+            margin-bottom: 0;
+            line-height: 1.5;
+        }
+
+        .indent-1 { text-indent: 2em; }
+        .indent-2 { text-indent: 4em; }
+        .indent-3 { text-indent: 6em; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div>
+            <h1>⚖️ 民事陳報個人意見狀 產製系統</h1>
+            <p>專為應對當事人提供之 AI 生成主張設計 ｜ 專業律師 專用工作流工具</p>
+        </div>
+        <div>
+            <span style="font-size: 12px; background: #e0e7ff; color: #3730a3; padding: 4px 10px; border-radius: 20px; font-weight: 600;">純瀏覽器運行 · 零依賴 · 永不閃退</span>
+        </div>
+    </header>
+
+    <div class="main-layout">
+        <!-- 左側：輸入表單 -->
+        <div class="card">
+            <div class="card-header">
+                <span>📝 書狀素材與案件資訊填寫</span>
+                <button type="button" class="btn btn-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="loadSample()">載入範例素材</button>
+            </div>
+
+            <!-- 自爆地雷即時警示窗 -->
+            <div id="trapAlert" class="alert-box">
+                <div class="alert-title">⚠️ 偵測到潛在之「不利自認 / 法律地雷」關鍵字！</div>
+                <div id="trapMessage" style="color: #92400e;">請審查內文是否含有收受款項、承認簽名真正、時效自認等可能免除對造舉證責任之文字。</div>
+            </div>
+
+            <form id="pleadingForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="court">承辦機關</label>
+                        <input type="text" id="court" value="臺灣臺北地方法院（民事○股）" oninput="updatePreview()">
+                    </div>
+                    <div class="form-group">
+                        <label for="caseNo">案號</label>
+                        <input type="text" id="caseNo" value="113年度重訴字第1234號" oninput="updatePreview()">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="plaintiff">原告姓名與送達處所</label>
+                    <input type="text" id="plaintiff" value="張○○　住臺北市中正區重慶南路○段○○○號" oninput="updatePreview()">
+                </div>
+
+                <div class="form-group">
+                    <label for="defendant">被告姓名與送達處所</label>
+                    <input type="text" id="defendant" value="李○○　住新北市板橋區縣民大道○段○○○號" oninput="updatePreview()">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="role">具狀人身分</label>
+                        <select id="role" onchange="onRoleChange()">
+                            <option value="原告">原告</option>
+                            <option value="被告">被告</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="partyName">具狀人姓名（本人簽名，不列律師）</label>
+                        <input type="text" id="partyName" value="張○○" oninput="updatePreview()">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="content">陳報意見內文（可直接貼上當事人或經 AI 整理後的主張）</label>
+                    <textarea id="content" rows="12" style="font-family: '標楷體', monospace; font-size: 14px;" oninput="onContentInput()"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="attachments">附件清單（每行一項，無附件可留空）</label>
+                    <textarea id="attachments" rows="3" style="font-family: '標楷體', monospace; font-size: 14px;" oninput="updatePreview()"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="customDate">具狀日期</label>
+                    <input type="text" id="customDate" value="" oninput="updatePreview()">
+                </div>
+
+                <div class="action-bar">
+                    <button type="button" class="btn btn-primary" onclick="exportToWord()">
+                        📥 一鍵下載 Word (.doc / .docx) 書狀
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="copyFullText()">
+                        📋 複製全文
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- 右側：即時司法書狀預覽 -->
+        <div>
+            <div class="card" style="margin-bottom: 12px; padding: 14px 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: 700; font-size: 14px; color: var(--secondary);">📄 即時排版預覽（標準 20pt / 14pt 標楷體 1.5倍行高）</span>
+                    <span style="font-size: 12px; color: var(--text-muted);">邊界：各 2.5cm</span>
+                </div>
+            </div>
+            <div class="preview-wrapper">
+                <div class="paper" id="paperPreview">
+                    <!-- 書狀內容動態渲染於此 -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 初始化日期
+    function initDate() {
+        const now = new Date();
+        const rocYear = now.getFullYear() - 1911;
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        document.getElementById('customDate').value = `中華民國 ${rocYear} 年 ${month} 月 ${day} 日`;
+    }
+
+    // 載入範例
+    function loadSample() {
+        document.getElementById('court').value = "臺灣臺北地方法院（民事○股）";
+        document.getElementById('caseNo').value = "199年度○○字第○○○○號";
+        document.getElementById('plaintiff').value = "張○○　住臺北市中正區重慶南路○段○○○號";
+        document.getElementById('defendant').value = "李○○　住新北市板橋區縣民大道○段○○○號";
+        document.getElementById('role').value = "原告";
+        document.getElementById('partyName').value = "張○○";
+        
+        document.getElementById('content').value = 
+`一、關於對造主張原告未依約交付貨品乙節，顯與客觀事實不符。
+　　（一）原告已於民國198年5月10日委託物流公司將全部貨品送達對造工廠，此有簽收單可稽。
+　　（二）對造受領貨品後從未為瑕疵通知，依法應視為承認受領之物。
+二、對造所提出之被證三通訊紀錄，有嚴重斷章取義與造假變造之嫌，具狀人未曾為該等承諾。
+三、綜上所述，依法陳報個人意見如上，懇請 鈞院明鑒。`;
+
+        document.getElementById('attachments').value = 
+`1、物流送達簽收單影本乙份。
+2、通訊軟體對話完整截圖三紙。`;
+        
+        initDate();
+        onContentInput();
+    }
+
+    function onRoleChange() {
+        const role = document.getElementById('role').value;
+        const plaintiff = document.getElementById('plaintiff').value;
+        const defendant = document.getElementById('defendant').value;
+        
+        if (role === "原告") {
+            const name = plaintiff.split('　')[0].trim();
+            if (name) document.getElementById('partyName').value = name;
+        } else {
+            const name = defendant.split('　')[0].trim();
+            if (name) document.getElementById('partyName').value = name;
+        }
+        updatePreview();
+    }
+
+    // 關鍵字檢測（不利自認偵測）
+    function onContentInput() {
+        const text = document.getElementById('content').value;
+        const alertBox = document.getElementById('trapAlert');
+        const alertMsg = document.getElementById('trapMessage');
+        
+        const traps = [
+            { keyword: "確實有收到", reason: "偵測到「收受款項」自認，若抗辯為贈與需承擔舉證責任！" },
+            { keyword: "有收到", reason: "偵測到可能自認收到款項或物品，請確認是否符合訴訟策略。" },
+            { keyword: "簽名是我簽", reason: "偵測到「承認私文書真正」，依法將推定契約有效，需舉證遭詐欺/脅迫！" },
+            { keyword: "是我簽的", reason: "偵測到「承認簽名真正」，請確認是否構成不利自認！" },
+            { keyword: "車子有碰到", reason: "偵測到「承認發生碰撞」，將免除對造對侵權接觸之舉證責任！" },
+            { keyword: "有碰到", reason: "偵測到可能承認碰撞/接觸，請謹慎評估。" },
+            { keyword: "有答應慢慢還", reason: "偵測到可能構成「債務承認 / 時效中斷 / 拋棄時效利益」之危險字句！" },
+            { keyword: "時效", reason: "涉及時效問題，請注意是否曾陳述過不利於時效抗辯之協商過程。" },
+            { keyword: "黑心律師", reason: "含有情緒性攻擊字眼，建議過濾以避免節外生枝。" },
+            { keyword: "詐欺慣犯", reason: "含有情緒性攻擊字眼，建議維持客觀事實陳述。" },
+            { keyword: "敗類", reason: "含有情緒性人身攻擊字眼，請予以刪除。" }
+        ];
+
+        let foundTraps = [];
+        for (let t of traps) {
+            if (text.includes(t.keyword)) {
+                foundTraps.push(`• 【${t.keyword}】：${t.reason}`);
+            }
+        }
+
+        if (foundTraps.length > 0) {
+            alertMsg.innerHTML = foundTraps.join("<br>");
+            alertBox.classList.add('show');
+        } else {
+            alertBox.classList.remove('show');
+        }
+
+        updatePreview();
+    }
+
+    // 格式化內文縮排
+    function formatOpinionLines(rawText) {
+        if (!rawText) return "";
+        const lines = rawText.split('\n');
+        return lines.map(line => {
+            const trimmed = line.trim();
+            if (!trimmed) return "<div class='paper-line'>&nbsp;</div>";
+            
+            // 檢查縮排層次
+            if (/^（[一二三四五六七八九十]+）/.test(trimmed) || /^\([0-9]+\)/.test(trimmed)) {
+                return `<div class='paper-line indent-1'>${escapeHtml(trimmed)}</div>`;
+            } else if (/^[0-9]+、/.test(trimmed) || /^[0-9]+\./.test(trimmed)) {
+                return `<div class='paper-line indent-2'>${escapeHtml(trimmed)}</div>`;
+            } else if (/^（[0-9]+）/.test(trimmed) || /^（[１２３４５６７８９０]+）/.test(trimmed)) {
+                return `<div class='paper-line indent-3'>${escapeHtml(trimmed)}</div>`;
+            } else {
+                return `<div class='paper-line'>${escapeHtml(trimmed)}</div>`;
+            }
+        }).join('');
+    }
+
+    function escapeHtml(str) {
+        return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    // 更新右側預覽
+    function updatePreview() {
+        const court = document.getElementById('court').value || "台灣○○地方法院（○股）";
+        const caseNo = document.getElementById('caseNo').value || "○○○年度○○字第○○○○號";
+        const plaintiff = document.getElementById('plaintiff').value || "○○○";
+        const defendant = document.getElementById('defendant').value || "○○○";
+        const role = document.getElementById('role').value || "原告";
+        const partyName = document.getElementById('partyName').value || "○○○";
+        const content = document.getElementById('content').value;
+        const attachments = document.getElementById('attachments').value.trim();
+        const dateStr = document.getElementById('customDate').value;
+
+        let courtShort = court.split('（')[0].trim();
+        if (!courtShort.endsWith("法院")) courtShort = "臺灣地方法院";
+
+        let attHtml = "";
+        if (attachments) {
+            const attLines = attachments.split('\n').filter(l => l.trim());
+            const items = attLines.map((l, i) => {
+                let text = l.trim();
+                if (!/^[0-9]+[、\.]/.test(text)) text = `${i+1}、${text}`;
+                return `<div class='paper-line indent-1'>${escapeHtml(text)}</div>`;
+            }).join('');
+            attHtml = `
+                <div style="margin-top: 14pt;">
+                    <div class='paper-line' style="font-weight: bold;">附件：</div>
+                    ${items}
+                </div>
+            `;
+        }
+
+        const previewHtml = `
+            <div class="paper-title">民事陳報個人意見狀</div>
+            <div class="paper-body">
+                <div class="paper-line">承辦機關：${escapeHtml(court)}</div>
+                <div class="paper-line" style="margin-bottom: 6pt;">案號：${escapeHtml(caseNo)}</div>
+                <div class="paper-line">原告　${escapeHtml(plaintiff)}</div>
+                <div class="paper-line" style="margin-bottom: 12pt;">被告　${escapeHtml(defendant)}</div>
+                
+                <div class="paper-line" style="font-weight: bold;">為陳報個人意見事：</div>
+                <div class="paper-line" style="margin-bottom: 8pt;">具狀人即本案${escapeHtml(role)}${escapeHtml(partyName)}，依法陳報個人意見如下：</div>
+                
+                ${formatOpinionLines(content)}
+                
+                <div style="margin-top: 16pt;">
+                    <div class="paper-line indent-1">謹　　狀</div>
+                    <div class="paper-line">${escapeHtml(courtShort)}　公鑒</div>
+                </div>
+                
+                ${attHtml}
+                
+                <div style="margin-top: 16pt;">
+                    <div class="paper-line">${escapeHtml(dateStr)}</div>
+                    <div class="paper-line" style="font-weight: bold; margin-top: 6pt;">具狀人：${escapeHtml(partyName)}　（簽章）</div>
+                </div>
+            </div>
+        `;
+
+        document.getElementById('paperPreview').innerHTML = previewHtml;
+    }
+
+    // 匯出為標準 Word 相容格式
+    function exportToWord() {
+        const caseNo = document.getElementById('caseNo').value || "書狀";
+        const partyName = document.getElementById('partyName').value || "當事人";
+        const safeCase = caseNo.replace(/[\/\\:*?"<>|]/g, '_');
+        const filename = `民事陳報個人意見狀_${safeCase}_${partyName}.doc`;
+
+        const court = document.getElementById('court').value;
+        const caseNoVal = document.getElementById('caseNo').value;
+        const plaintiff = document.getElementById('plaintiff').value;
+        const defendant = document.getElementById('defendant').value;
+        const role = document.getElementById('role').value;
+        const rawContent = document.getElementById('content').value;
+        const attachments = document.getElementById('attachments').value.trim();
+        const dateStr = document.getElementById('customDate').value;
+        
+        let courtShort = court.split('（')[0].trim();
+        if (!courtShort.endsWith("法院")) courtShort = "臺灣地方法院";
+
+        // 處理內文換行與縮排
+        const lines = rawContent.split('\n');
+        const wordContentHtml = lines.map(line => {
+            const trimmed = line.trim();
+            if (!trimmed) return "<p style='margin:0;line-height:150%;'>&nbsp;</p>";
+            let indent = "0cm";
+            if (/^（[一二三四五六七八九十]+）/.test(trimmed) || /^\([0-9]+\)/.test(trimmed)) {
+                indent = "0.75cm";
+            } else if (/^[0-9]+、/.test(trimmed) || /^[0-9]+\./.test(trimmed)) {
+                indent = "1.5cm";
+            } else if (/^（[0-9]+）/.test(trimmed) || /^（[１２３４５６７８９０]+）/.test(trimmed)) {
+                indent = "2.25cm";
+            }
+            return `<p style='margin:0;line-height:150%;text-indent:${indent};font-family:標楷體,DFKai-SB;font-size:14.0pt;'>${escapeHtml(trimmed)}</p>`;
+        }).join('');
+
+        let attHtml = "";
+        if (attachments) {
+            const attLines = attachments.split('\n').filter(l => l.trim());
+            const items = attLines.map((l, i) => {
+                let text = l.trim();
+                if (!/^[0-9]+[、\.]/.test(text)) text = `${i+1}、${text}`;
+                return `<p style='margin:0;line-height:150%;text-indent:0.75cm;font-family:標楷體,DFKai-SB;font-size:14.0pt;'>${escapeHtml(text)}</p>`;
+            }).join('');
+            attHtml = `
+                <p style='margin:0;margin-top:12pt;line-height:150%;font-weight:bold;font-family:標楷體,DFKai-SB;font-size:14.0pt;'>附件：</p>
+                ${items}
+            `;
+        }
+
+        const wordTemplate = `
+<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head>
+    <meta charset='utf-8'>
+    <title>民事陳報個人意見狀</title>
+    <!--[if gte mso 9]>
+    <xml>
+    <w:WordDocument>
+        <w:View>Print</w:View>
+        <w:Zoom>100</w:Zoom>
+        <w:DoNotOptimizeForBrowser/>
+    </w:WordDocument>
+    </xml>
+    <![endif]-->
+    <style>
+        @page Section1 {
+            size: 21.0cm 29.7cm;
+            margin: 2.5cm 2.5cm 2.5cm 2.5cm;
+            mso-header-margin: 36.0pt;
+            mso-footer-margin: 36.0pt;
+            mso-paper-source: 0;
+        }
+        div.Section1 { page: Section1; }
+        p {
+            font-family: "標楷體", "DFKai-SB", serif;
+            font-size: 14.0pt;
+            line-height: 150%;
+            margin-top: 0;
+            margin-bottom: 0;
+        }
+        .title {
+            font-size: 20.0pt;
+            font-weight: bold;
+            text-align: center;
+            line-height: 150%;
+            margin-bottom: 12.0pt;
+            font-family: "標楷體", "DFKai-SB", serif;
+        }
+    </style>
+</head>
+<body lang=ZH-TW style='tab-interval:36.0pt'>
+<div class=Section1>
+    <p class="title">民事陳報個人意見狀</p>
+    <p>承辦機關：${escapeHtml(court)}</p>
+    <p style='margin-bottom:6.0pt;'>案號：${escapeHtml(caseNoVal)}</p>
+    <p>原告　${escapeHtml(plaintiff)}</p>
+    <p style='margin-bottom:10.0pt;'>被告　${escapeHtml(defendant)}</p>
+    
+    <p style='font-weight:bold;'>為陳報個人意見事：</p>
+    <p style='margin-bottom:6.0pt;'>具狀人即本案${escapeHtml(role)}${escapeHtml(partyName)}，依法陳報個人意見如下：</p>
+    
+    ${wordContentHtml}
+    
+    <p style='margin-top:12.0pt;text-indent:0.75cm;'>謹　　狀</p>
+    <p style='margin-bottom:12.0pt;'>${escapeHtml(courtShort)}　公鑒</p>
+    
+    ${attHtml}
+    
+    <p style='margin-top:12.0pt;'>${escapeHtml(dateStr)}</p>
+    <p style='font-weight:bold;margin-top:6.0pt;'>具狀人：${escapeHtml(partyName)}　（簽章）</p>
+</div>
+</body>
+</html>`;
+
+        const blob = new Blob(['\ufeff' + wordTemplate], {
+            type: 'application/msword;charset=utf-8'
+        });
+
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    // 複製純文字
+    function copyFullText() {
+        const preview = document.getElementById('paperPreview');
+        const text = preview.innerText;
+        navigator.clipboard.writeText(text).then(() => {
+            alert("📋 已成功複製書狀全文到剪貼簿！可直接貼至 Word 或通訊軟體中。");
+        }).catch(err => {
+            alert("複製失敗，請手動選取右側文字複製。");
+        });
+    }
+
+    // 頁面載入時初始化
+    window.onload = function() {
+        loadSample();
+    };
+</script>
+
+</body>
+</html>

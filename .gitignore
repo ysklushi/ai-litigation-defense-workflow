@@ -1,0 +1,18 @@
+﻿# 忽略所有暫存檔與備份
+*.tmp
+*.bak
+*~
+~$*
+.DS_Store
+Thumbs.db
+
+# 忽略本機系統或日誌檔案
+*.log
+.vscode/
+.idea/
+
+# 絕對禁止加入實體個資資料夾
+相關資料/
+*.pdf
+*.docx
+*.doc
