@@ -67,7 +67,7 @@
 
         .main-layout {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1.1fr 0.9fr;
             gap: 24px;
             align-items: start;
         }
@@ -137,6 +137,46 @@
         textarea {
             resize: vertical;
             line-height: 1.5;
+        }
+
+        .dynamic-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .dynamic-item {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .btn-mini-group {
+            display: flex;
+            gap: 6px;
+            margin-top: 4px;
+            margin-bottom: 12px;
+        }
+
+        .btn-mini {
+            padding: 4px 10px;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            background: #f8fafc;
+            color: #334155;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.15s ease;
+        }
+
+        .btn-mini:hover {
+            background: #e2e8f0;
+            border-color: #94a3b8;
         }
 
         .alert-box {
@@ -256,7 +296,7 @@
     <header>
         <div>
             <h1>⚖️ 民事陳報個人意見狀 產製系統</h1>
-            <p>專為應對當事人提供之 AI 生成主張設計 ｜ 專業律師 專用工作流工具</p>
+            <p>專為應對當事人提供之補充意見設計 ｜ 訴訟意見雙軌分流工作流工具</p>
         </div>
         <div>
             <span style="font-size: 12px; background: #e0e7ff; color: #3730a3; padding: 4px 10px; border-radius: 20px; font-weight: 600;">純瀏覽器運行 · 零依賴 · 永不閃退</span>
@@ -289,14 +329,32 @@
                     </div>
                 </div>
 
+                <!-- 原告動態欄位 -->
                 <div class="form-group">
-                    <label for="plaintiff">原告姓名與送達處所</label>
-                    <input type="text" id="plaintiff" value="張○○　住臺北市中正區重慶南路一段122號" oninput="updatePreview()">
+                    <label>原告姓名與送達處所</label>
+                    <div id="plaintiffsContainer" class="dynamic-list">
+                        <div class="dynamic-item">
+                            <input type="text" class="plaintiff-input" value="張○○　住臺北市中正區重慶南路○段○○○號" oninput="updatePreview()">
+                        </div>
+                    </div>
+                    <div class="btn-mini-group">
+                        <button type="button" class="btn-mini" onclick="addParty('plaintiff')">➕ 增加原告</button>
+                        <button type="button" class="btn-mini" onclick="removeParty('plaintiff')">➖ 刪減原告</button>
+                    </div>
                 </div>
 
+                <!-- 被告動態欄位 -->
                 <div class="form-group">
-                    <label for="defendant">被告姓名與送達處所</label>
-                    <input type="text" id="defendant" value="李○○　住新北市板橋區縣民大道二段7號" oninput="updatePreview()">
+                    <label>被告姓名與送達處所</label>
+                    <div id="defendantsContainer" class="dynamic-list">
+                        <div class="dynamic-item">
+                            <input type="text" class="defendant-input" value="李○○　住新北市板橋區縣民大道○段○○○號" oninput="updatePreview()">
+                        </div>
+                    </div>
+                    <div class="btn-mini-group">
+                        <button type="button" class="btn-mini" onclick="addParty('defendant')">➕ 增加被告</button>
+                        <button type="button" class="btn-mini" onclick="removeParty('defendant')">➖ 刪減被告</button>
+                    </div>
                 </div>
 
                 <div class="form-row">
@@ -305,6 +363,10 @@
                         <select id="role" onchange="onRoleChange()">
                             <option value="原告">原告</option>
                             <option value="被告">被告</option>
+                            <option value="上訴人即原告">上訴人即原告</option>
+                            <option value="上訴人即被告">上訴人即被告</option>
+                            <option value="被上訴人即原告">被上訴人即原告</option>
+                            <option value="被上訴人即被告">被上訴人即被告</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -314,18 +376,18 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="content">陳報意見內文（可直接貼上當事人或經 AI 整理後的主張）</label>
-                    <textarea id="content" rows="12" style="font-family: '標楷體', monospace; font-size: 14px;" oninput="onContentInput()"></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label for="attachments">附件清單（每行一項，無附件可留空）</label>
-                    <textarea id="attachments" rows="3" style="font-family: '標楷體', monospace; font-size: 14px;" oninput="updatePreview()"></textarea>
+                    <label for="content">陳報意見內文（可直接貼上當事人或經整理後的主張）</label>
+                    <textarea id="content" rows="11" style="font-family: '標楷體', monospace; font-size: 14px;" oninput="onContentInput()"></textarea>
                 </div>
 
                 <div class="form-group">
                     <label for="customDate">具狀日期</label>
                     <input type="text" id="customDate" value="" oninput="updatePreview()">
+                </div>
+
+                <div class="form-group">
+                    <label for="attachments">附件清單（每行一項，無附件可留空）</label>
+                    <textarea id="attachments" rows="3" style="font-family: '標楷體', monospace; font-size: 14px;" oninput="updatePreview()"></textarea>
                 </div>
 
                 <div class="action-bar">
@@ -363,28 +425,74 @@
         const rocYear = now.getFullYear() - 1911;
         const month = String(now.getMonth() + 1).padStart(2, '0');
         const day = String(now.getDate()).padStart(2, '0');
-        document.getElementById('customDate').value = `中華民國 ${rocYear} 年 ${month} 月 ${day} 日`;
+        document.getElementById('customDate').value = "中華民國 " + rocYear + " 年 " + month + " 月 " + day + " 日";
+    }
+
+    // 動態新增當事人欄位
+    function addParty(type) {
+        const containerId = type === 'plaintiff' ? 'plaintiffsContainer' : 'defendantsContainer';
+        const className = type === 'plaintiff' ? 'plaintiff-input' : 'defendant-input';
+        const placeholder = type === 'plaintiff' ? '原告姓名　住址/處所' : '被告姓名　住址/處所';
+        
+        const container = document.getElementById(containerId);
+        const div = document.createElement('div');
+        div.className = 'dynamic-item';
+        div.innerHTML = '<input type="text" class="' + className + '" placeholder="' + placeholder + '" oninput="updatePreview()">';
+        container.appendChild(div);
+        updatePreview();
+    }
+
+    // 動態刪減當事人欄位 (至少保留一個)
+    function removeParty(type) {
+        const containerId = type === 'plaintiff' ? 'plaintiffsContainer' : 'defendantsContainer';
+        const container = document.getElementById(containerId);
+        if (container.children.length > 1) {
+            container.removeChild(container.lastElementChild);
+            updatePreview();
+        }
+    }
+
+    // 取得所有原告清單
+    function getPlaintiffs() {
+        const inputs = document.querySelectorAll('.plaintiff-input');
+        const list = [];
+        inputs.forEach(inp => {
+            if (inp.value.trim()) list.push(inp.value.trim());
+        });
+        return list.length > 0 ? list : ['○○○'];
+    }
+
+    // 取得所有被告清單
+    function getDefendants() {
+        const inputs = document.querySelectorAll('.defendant-input');
+        const list = [];
+        inputs.forEach(inp => {
+            if (inp.value.trim()) list.push(inp.value.trim());
+        });
+        return list.length > 0 ? list : ['○○○'];
     }
 
     // 載入範例
     function loadSample() {
         document.getElementById('court').value = "臺灣臺北地方法院（民事○股）";
-        document.getElementById('caseNo').value = "113年度重訴字第1234號";
-        document.getElementById('plaintiff').value = "張○○　住臺北市中正區重慶南路一段122號";
-        document.getElementById('defendant').value = "李○○　住新北市板橋區縣民大道二段7號";
+        document.getElementById('caseNo').value = "199年度○○字第○○○○號";
+        
+        // 重設原告
+        const pContainer = document.getElementById('plaintiffsContainer');
+        pContainer.innerHTML = '<div class="dynamic-item"><input type="text" class="plaintiff-input" value="張○○　住臺北市中正區重慶南路○段○○○號" oninput="updatePreview()"></div>';
+        
+        // 重設被告
+        const dContainer = document.getElementById('defendantsContainer');
+        dContainer.innerHTML = '<div class="dynamic-item"><input type="text" class="defendant-input" value="李○○　住新北市板橋區縣民大道○段○○○號" oninput="updatePreview()"></div>';
+        
         document.getElementById('role').value = "原告";
         document.getElementById('partyName').value = "張○○";
         
         document.getElementById('content').value = 
-`一、關於對造主張原告未依約交付貨品乙節，顯與客觀事實不符。
-　　（一）原告已於民國112年5月10日委託物流公司將全部貨品送達對造工廠，此有簽收單可稽。
-　　（二）對造受領貨品後從未為瑕疵通知，依法應視為承認受領之物。
-二、對造所提出之被證三通訊紀錄，有嚴重斷章取義與造假變造之嫌，具狀人未曾為該等承諾。
-三、綜上所述，依法陳報個人意見如上，懇請 鈞院明鑒。`;
+"一、關於對造主張原告未依約交付貨品乙節，顯與客觀事實不符。\n　　（一）原告已於民國198年5月10日委託物流公司將全部貨品送達對造工廠，此有簽收單可稽。\n　　（二）對造受領貨品後從未為瑕疵通知，依法應視為承認受領之物。\n二、對造所提出之被證三通訊紀錄，有嚴重斷章取義與造假變造之嫌，具狀人未曾為該等承諾。\n三、綜上所述，依法陳報個人意見如上，懇請 鈞院明鑒。";
 
         document.getElementById('attachments').value = 
-`1、物流送達簽收單影本乙份。
-2、通訊軟體對話完整截圖三紙。`;
+"1、物流送達簽收單影本乙份。\n2、通訊軟體對話完整截圖三紙。";
         
         initDate();
         onContentInput();
@@ -392,14 +500,14 @@
 
     function onRoleChange() {
         const role = document.getElementById('role').value;
-        const plaintiff = document.getElementById('plaintiff').value;
-        const defendant = document.getElementById('defendant').value;
+        const plaintiffs = getPlaintiffs();
+        const defendants = getDefendants();
         
-        if (role === "原告") {
-            const name = plaintiff.split('　')[0].trim();
+        if (role.includes("原告")) {
+            const name = plaintiffs[0].split('　')[0].split(' ')[0].trim();
             if (name) document.getElementById('partyName').value = name;
         } else {
-            const name = defendant.split('　')[0].trim();
+            const name = defendants[0].split('　')[0].split(' ')[0].trim();
             if (name) document.getElementById('partyName').value = name;
         }
         updatePreview();
@@ -428,7 +536,7 @@
         let foundTraps = [];
         for (let t of traps) {
             if (text.includes(t.keyword)) {
-                foundTraps.push(`• 【${t.keyword}】：${t.reason}`);
+                foundTraps.push("• 【" + t.keyword + "】： " + t.reason);
             }
         }
 
@@ -452,13 +560,13 @@
             
             // 檢查縮排層次
             if (/^（[一二三四五六七八九十]+）/.test(trimmed) || /^\([0-9]+\)/.test(trimmed)) {
-                return `<div class='paper-line indent-1'>${escapeHtml(trimmed)}</div>`;
+                return "<div class='paper-line indent-1'>" + escapeHtml(trimmed) + "</div>";
             } else if (/^[0-9]+、/.test(trimmed) || /^[0-9]+\./.test(trimmed)) {
-                return `<div class='paper-line indent-2'>${escapeHtml(trimmed)}</div>`;
+                return "<div class='paper-line indent-2'>" + escapeHtml(trimmed) + "</div>";
             } else if (/^（[0-9]+）/.test(trimmed) || /^（[１２３４５６７８９０]+）/.test(trimmed)) {
-                return `<div class='paper-line indent-3'>${escapeHtml(trimmed)}</div>`;
+                return "<div class='paper-line indent-3'>" + escapeHtml(trimmed) + "</div>";
             } else {
-                return `<div class='paper-line'>${escapeHtml(trimmed)}</div>`;
+                return "<div class='paper-line'>" + escapeHtml(trimmed) + "</div>";
             }
         }).join('');
     }
@@ -467,12 +575,12 @@
         return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     }
 
-    // 更新右側預覽
+    // 更新右側預覽 (調整順序：公鑒 -> 年月日 -> 附件 -> 具狀人)
     function updatePreview() {
         const court = document.getElementById('court').value || "台灣○○地方法院（○股）";
         const caseNo = document.getElementById('caseNo').value || "○○○年度○○字第○○○○號";
-        const plaintiff = document.getElementById('plaintiff').value || "○○○";
-        const defendant = document.getElementById('defendant').value || "○○○";
+        const plaintiffs = getPlaintiffs();
+        const defendants = getDefendants();
         const role = document.getElementById('role').value || "原告";
         const partyName = document.getElementById('partyName').value || "○○○";
         const content = document.getElementById('content').value;
@@ -482,63 +590,65 @@
         let courtShort = court.split('（')[0].trim();
         if (!courtShort.endsWith("法院")) courtShort = "臺灣地方法院";
 
+        // 原告多行
+        const pLinesHtml = plaintiffs.map(p => "<div class='paper-line'>原告　" + escapeHtml(p) + "</div>").join('');
+        // 被告多行
+        const dLinesHtml = defendants.map(d => "<div class='paper-line'>被告　" + escapeHtml(d) + "</div>").join('');
+
         let attHtml = "";
         if (attachments) {
             const attLines = attachments.split('\n').filter(l => l.trim());
             const items = attLines.map((l, i) => {
                 let text = l.trim();
-                if (!/^[0-9]+[、\.]/.test(text)) text = `${i+1}、${text}`;
-                return `<div class='paper-line indent-1'>${escapeHtml(text)}</div>`;
+                if (!/^[0-9]+[、\.]/.test(text)) text = (i+1) + "、" + text;
+                return "<div class='paper-line indent-1'>" + escapeHtml(text) + "</div>";
             }).join('');
-            attHtml = `
-                <div style="margin-top: 14pt;">
-                    <div class='paper-line' style="font-weight: bold;">附件：</div>
-                    ${items}
-                </div>
-            `;
+            attHtml = '<div style="margin-top: 14pt;"><div class="paper-line" style="font-weight: bold;">附件：</div>' + items + '</div>';
         }
 
-        const previewHtml = `
-            <div class="paper-title">民事陳報個人意見狀</div>
-            <div class="paper-body">
-                <div class="paper-line">承辦機關：${escapeHtml(court)}</div>
-                <div class="paper-line" style="margin-bottom: 6pt;">案號：${escapeHtml(caseNo)}</div>
-                <div class="paper-line">原告　${escapeHtml(plaintiff)}</div>
-                <div class="paper-line" style="margin-bottom: 12pt;">被告　${escapeHtml(defendant)}</div>
+        const previewHtml = 
+            '<div class="paper-title">民事陳報個人意見狀</div>' +
+            '<div class="paper-body">' +
+                '<div class="paper-line">承辦機關：' + escapeHtml(court) + '</div>' +
+                '<div class="paper-line" style="margin-bottom: 6pt;">案號：' + escapeHtml(caseNo) + '</div>' +
+                pLinesHtml +
+                '<div style="margin-bottom: 12pt;">' + dLinesHtml + '</div>' +
                 
-                <div class="paper-line" style="font-weight: bold;">為陳報個人意見事：</div>
-                <div class="paper-line" style="margin-bottom: 8pt;">具狀人即本案${escapeHtml(role)}${escapeHtml(partyName)}，依法陳報個人意見如下：</div>
+                '<div class="paper-line" style="font-weight: bold;">為陳報個人意見事：</div>' +
+                '<div class="paper-line" style="margin-bottom: 8pt;">具狀人即本案' + escapeHtml(role) + escapeHtml(partyName) + '，依法陳報個人意見如下：</div>' +
                 
-                ${formatOpinionLines(content)}
+                formatOpinionLines(content) +
                 
-                <div style="margin-top: 16pt;">
-                    <div class="paper-line indent-1">謹　　狀</div>
-                    <div class="paper-line">${escapeHtml(courtShort)}　公鑒</div>
-                </div>
+                '<div style="margin-top: 16pt;">' +
+                    '<div class="paper-line indent-1">謹　　狀</div>' +
+                    '<div class="paper-line">' + escapeHtml(courtShort) + '　公鑒</div>' +
+                '</div>' +
                 
-                ${attHtml}
+                '<div style="margin-top: 14pt;">' +
+                    '<div class="paper-line">' + escapeHtml(dateStr) + '</div>' +
+                '</div>' +
                 
-                <div style="margin-top: 16pt;">
-                    <div class="paper-line">${escapeHtml(dateStr)}</div>
-                    <div class="paper-line" style="font-weight: bold; margin-top: 6pt;">具狀人：${escapeHtml(partyName)}　（簽章）</div>
-                </div>
-            </div>
-        `;
+                attHtml +
+                
+                '<div style="margin-top: 16pt;">' +
+                    '<div class="paper-line" style="font-weight: bold;">具狀人：' + escapeHtml(partyName) + '　（簽章）</div>' +
+                '</div>' +
+            '</div>';
 
         document.getElementById('paperPreview').innerHTML = previewHtml;
     }
 
-    // 匯出為標準 Word 相容格式
+    // 匯出為標準 Word 相容格式 (調整順序：公鑒 -> 年月日 -> 附件 -> 具狀人)
     function exportToWord() {
         const caseNo = document.getElementById('caseNo').value || "書狀";
         const partyName = document.getElementById('partyName').value || "當事人";
         const safeCase = caseNo.replace(/[\/\\:*?"<>|]/g, '_');
-        const filename = `民事陳報個人意見狀_${safeCase}_${partyName}.doc`;
+        const filename = "民事陳報個人意見狀_" + safeCase + "_" + partyName + ".doc";
 
         const court = document.getElementById('court').value;
         const caseNoVal = document.getElementById('caseNo').value;
-        const plaintiff = document.getElementById('plaintiff').value;
-        const defendant = document.getElementById('defendant').value;
+        const plaintiffs = getPlaintiffs();
+        const defendants = getDefendants();
         const role = document.getElementById('role').value;
         const rawContent = document.getElementById('content').value;
         const attachments = document.getElementById('attachments').value.trim();
@@ -546,6 +656,13 @@
         
         let courtShort = court.split('（')[0].trim();
         if (!courtShort.endsWith("法院")) courtShort = "臺灣地方法院";
+
+        // 原告與被告多行 Word 格式
+        const pLinesWord = plaintiffs.map(p => "<p>原告　" + escapeHtml(p) + "</p>").join('');
+        const dLinesWord = defendants.map((d, idx) => {
+            const isLast = idx === defendants.length - 1;
+            return "<p style='" + (isLast ? "margin-bottom:10.0pt;" : "") + "'>被告　" + escapeHtml(d) + "</p>";
+        }).join('');
 
         // 處理內文換行與縮排
         const lines = rawContent.split('\n');
@@ -560,7 +677,7 @@
             } else if (/^（[0-9]+）/.test(trimmed) || /^（[１２３４５６７８９０]+）/.test(trimmed)) {
                 indent = "2.25cm";
             }
-            return `<p style='margin:0;line-height:150%;text-indent:${indent};font-family:標楷體,DFKai-SB;font-size:14.0pt;'>${escapeHtml(trimmed)}</p>`;
+            return "<p style='margin:0;line-height:150%;text-indent:" + indent + ";font-family:標楷體,DFKai-SB;font-size:14.0pt;'>" + escapeHtml(trimmed) + "</p>";
         }).join('');
 
         let attHtml = "";
@@ -568,78 +685,70 @@
             const attLines = attachments.split('\n').filter(l => l.trim());
             const items = attLines.map((l, i) => {
                 let text = l.trim();
-                if (!/^[0-9]+[、\.]/.test(text)) text = `${i+1}、${text}`;
-                return `<p style='margin:0;line-height:150%;text-indent:0.75cm;font-family:標楷體,DFKai-SB;font-size:14.0pt;'>${escapeHtml(text)}</p>`;
+                if (!/^[0-9]+[、\.]/.test(text)) text = (i+1) + "、" + text;
+                return "<p style='margin:0;line-height:150%;text-indent:0.75cm;font-family:標楷體,DFKai-SB;font-size:14.0pt;'>" + escapeHtml(text) + "</p>";
             }).join('');
-            attHtml = `
-                <p style='margin:0;margin-top:12pt;line-height:150%;font-weight:bold;font-family:標楷體,DFKai-SB;font-size:14.0pt;'>附件：</p>
-                ${items}
-            `;
+            attHtml = "<p style='margin:0;margin-top:12pt;line-height:150%;font-weight:bold;font-family:標楷體,DFKai-SB;font-size:14.0pt;'>附件：</p>" + items;
         }
 
-        const wordTemplate = `
-<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-<head>
-    <meta charset='utf-8'>
-    <title>民事陳報個人意見狀</title>
-    <!--[if gte mso 9]>
-    <xml>
-    <w:WordDocument>
-        <w:View>Print</w:View>
-        <w:Zoom>100</w:Zoom>
-        <w:DoNotOptimizeForBrowser/>
-    </w:WordDocument>
-    </xml>
-    <![endif]-->
-    <style>
-        @page Section1 {
-            size: 21.0cm 29.7cm;
-            margin: 2.5cm 2.5cm 2.5cm 2.5cm;
-            mso-header-margin: 36.0pt;
-            mso-footer-margin: 36.0pt;
-            mso-paper-source: 0;
-        }
-        div.Section1 { page: Section1; }
-        p {
-            font-family: "標楷體", "DFKai-SB", serif;
-            font-size: 14.0pt;
-            line-height: 150%;
-            margin-top: 0;
-            margin-bottom: 0;
-        }
-        .title {
-            font-size: 20.0pt;
-            font-weight: bold;
-            text-align: center;
-            line-height: 150%;
-            margin-bottom: 12.0pt;
-            font-family: "標楷體", "DFKai-SB", serif;
-        }
-    </style>
-</head>
-<body lang=ZH-TW style='tab-interval:36.0pt'>
-<div class=Section1>
-    <p class="title">民事陳報個人意見狀</p>
-    <p>承辦機關：${escapeHtml(court)}</p>
-    <p style='margin-bottom:6.0pt;'>案號：${escapeHtml(caseNoVal)}</p>
-    <p>原告　${escapeHtml(plaintiff)}</p>
-    <p style='margin-bottom:10.0pt;'>被告　${escapeHtml(defendant)}</p>
-    
-    <p style='font-weight:bold;'>為陳報個人意見事：</p>
-    <p style='margin-bottom:6.0pt;'>具狀人即本案${escapeHtml(role)}${escapeHtml(partyName)}，依法陳報個人意見如下：</p>
-    
-    ${wordContentHtml}
-    
-    <p style='margin-top:12.0pt;text-indent:0.75cm;'>謹　　狀</p>
-    <p style='margin-bottom:12.0pt;'>${escapeHtml(courtShort)}　公鑒</p>
-    
-    ${attHtml}
-    
-    <p style='margin-top:12.0pt;'>${escapeHtml(dateStr)}</p>
-    <p style='font-weight:bold;margin-top:6.0pt;'>具狀人：${escapeHtml(partyName)}　（簽章）</p>
-</div>
-</body>
-</html>`;
+        const wordTemplate = 
+'<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">' +
+'<head>' +
+'    <meta charset="utf-8">' +
+'    <title>民事陳報個人意見狀</title>' +
+'    <!--[if gte mso 9]>' +
+'    <xml>' +
+'    <w:WordDocument>' +
+'        <w:View>Print</w:View>' +
+'        <w:Zoom>100</w:Zoom>' +
+'        <w:DoNotOptimizeForBrowser/>' +
+'    </w:WordDocument>' +
+'    </xml>' +
+'    <![endif]-->' +
+'    <style>' +
+'        @page Section1 {' +
+'            size: 21.0cm 29.7cm;' +
+'            margin: 2.5cm 2.5cm 2.5cm 2.5cm;' +
+'            mso-header-margin: 36.0pt;' +
+'            mso-footer-margin: 36.0pt;' +
+'            mso-paper-source: 0;' +
+'        }' +
+'        div.Section1 { page: Section1; }' +
+'        p {' +
+'            font-family: "標楷體", "DFKai-SB", serif;' +
+'            font-size: 14.0pt;' +
+'            line-height: 150%;' +
+'            margin-top: 0;' +
+'            margin-bottom: 0;' +
+'        }' +
+'        .title {' +
+'            font-size: 20.0pt;' +
+'            font-weight: bold;' +
+'            text-align: center;' +
+'            line-height: 150%;' +
+'            margin-bottom: 12.0pt;' +
+'            font-family: "標楷體", "DFKai-SB", serif;' +
+'        }' +
+'    </style>' +
+'</head>' +
+'<body lang=ZH-TW style="tab-interval:36.0pt">' +
+'<div class=Section1>' +
+'    <p class="title">民事陳報個人意見狀</p>' +
+'    <p>承辦機關：' + escapeHtml(court) + '</p>' +
+'    <p style="margin-bottom:6.0pt;">案號：' + escapeHtml(caseNoVal) + '</p>' +
+     pLinesWord +
+     dLinesWord +
+'    <p style="font-weight:bold;">為陳報個人意見事：</p>' +
+'    <p style="margin-bottom:6.0pt;">具狀人即本案' + escapeHtml(role) + escapeHtml(partyName) + '，依法陳報個人意見如下：</p>' +
+     wordContentHtml +
+'    <p style="margin-top:12.0pt;text-indent:0.75cm;">謹　　狀</p>' +
+'    <p style="margin-bottom:12.0pt;">' + escapeHtml(courtShort) + '　公鑒</p>' +
+'    <p style="margin-top:12.0pt;">' + escapeHtml(dateStr) + '</p>' +
+     attHtml +
+'    <p style="font-weight:bold;margin-top:14.0pt;">具狀人：' + escapeHtml(partyName) + '　（簽章）</p>' +
+'</div>' +
+'</body>' +
+'</html>';
 
         const blob = new Blob(['\ufeff' + wordTemplate], {
             type: 'application/msword;charset=utf-8'
