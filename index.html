@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>民事陳報個人意見狀 自動產製系統</title>
+    <title>民刑事陳報個人意見狀 自動產製系統</title>
     <style>
         :root {
             --primary: #1e3a8a;
@@ -96,6 +96,8 @@
             align-items: center;
             border-bottom: 1px solid #f1f5f9;
             padding-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 8px;
         }
 
         .form-group {
@@ -295,7 +297,7 @@
 <div class="container">
     <header>
         <div>
-            <h1>⚖️ 民事陳報個人意見狀 產製系統</h1>
+            <h1>⚖️ 民刑事陳報個人意見狀 產製系統</h1>
             <p>專為應對當事人提供之補充意見設計 ｜ 訴訟意見雙軌分流工作流工具</p>
         </div>
         <div>
@@ -308,9 +310,10 @@
         <div class="card">
             <div class="card-header">
                 <span>📝 書狀素材與案件資訊填寫</span>
-                <div style="display: flex; gap: 8px;">
+                <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                    <button type="button" class="btn btn-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="loadSample('civil')">🏛️ 載入民事範例</button>
+                    <button type="button" class="btn btn-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="loadSample('criminal')">⚖️ 載入刑事範例</button>
                     <button type="button" class="btn btn-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="clearForm()">🗑️ 清空表單</button>
-                    <button type="button" class="btn btn-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="loadSample()">🔄 重設為範例</button>
                 </div>
             </div>
 
@@ -321,6 +324,18 @@
             </div>
 
             <form id="pleadingForm">
+                <!-- 狀頭 / 書狀名稱自訂與切換 -->
+                <div class="form-group" style="background: #f8fafc; padding: 12px 14px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <label for="docTitle" style="margin-bottom: 0; font-weight: 700; color: var(--primary);">📋 書狀名稱（狀頭，可自由修改）</label>
+                        <div style="display: flex; gap: 6px;">
+                            <button type="button" class="btn-mini" style="background:#e0e7ff; color:#3730a3; border-color:#c7d2fe;" onclick="switchDocTitle('民事陳報個人意見狀')">民事狀頭</button>
+                            <button type="button" class="btn-mini" style="background:#fef3c7; color:#92400e; border-color:#fde68a;" onclick="switchDocTitle('刑事陳報個人意見狀')">刑事狀頭</button>
+                        </div>
+                    </div>
+                    <input type="text" id="docTitle" value="民事陳報個人意見狀" placeholder="例：民事陳報個人意見狀、刑事陳報個人意見狀" oninput="updatePreview()" style="font-weight: bold; font-size: 15px;">
+                </div>
+
                 <div class="form-row">
                     <div class="form-group">
                         <label for="court">承辦機關</label>
@@ -332,31 +347,57 @@
                     </div>
                 </div>
 
-                <!-- 原告動態欄位 -->
+                <!-- 當事人第1組（動態欄位） -->
                 <div class="form-group">
-                    <label>原告姓名與送達處所</label>
-                    <div id="plaintiffsContainer" class="dynamic-list">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <label id="party1Label" style="margin-bottom: 0;">原告姓名與送達處所</label>
+                        <div style="display: flex; gap: 4px; align-items: center;">
+                            <span style="font-size: 12px; color: var(--text-muted);">稱謂：</span>
+                            <select id="party1RoleSelect" onchange="onPartyRoleChange()" style="width: auto; padding: 2px 6px; font-size: 12px;">
+                                <option value="原告">原告</option>
+                                <option value="被告">被告</option>
+                                <option value="告訴人">告訴人</option>
+                                <option value="自訴人">自訴人</option>
+                                <option value="聲請人">聲請人</option>
+                                <option value="上訴人">上訴人</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="party1Container" class="dynamic-list">
                         <div class="dynamic-item">
-                            <input type="text" class="plaintiff-input" placeholder="原告姓名　住址/處所" value="張○○　住臺北市中正區重慶南路○段○○○號" oninput="updatePreview()">
+                            <input type="text" class="party1-input" placeholder="姓名　住址/送達處所" value="張○○　住臺北市中正區重慶南路○段○○○號" oninput="updatePreview()">
                         </div>
                     </div>
                     <div class="btn-mini-group">
-                        <button type="button" class="btn-mini" onclick="addParty('plaintiff')">➕ 增加原告</button>
-                        <button type="button" class="btn-mini" onclick="removeParty('plaintiff')">➖ 刪減原告</button>
+                        <button type="button" class="btn-mini" id="btnAddParty1" onclick="addParty('party1')">➕ 增加人名</button>
+                        <button type="button" class="btn-mini" id="btnRemoveParty1" onclick="removeParty('party1')">➖ 刪減人名</button>
                     </div>
                 </div>
 
-                <!-- 被告動態欄位 -->
+                <!-- 當事人第2組（動態欄位） -->
                 <div class="form-group">
-                    <label>被告姓名與送達處所</label>
-                    <div id="defendantsContainer" class="dynamic-list">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <label id="party2Label" style="margin-bottom: 0;">被告姓名與送達處所</label>
+                        <div style="display: flex; gap: 4px; align-items: center;">
+                            <span style="font-size: 12px; color: var(--text-muted);">稱謂：</span>
+                            <select id="party2RoleSelect" onchange="onPartyRoleChange()" style="width: auto; padding: 2px 6px; font-size: 12px;">
+                                <option value="被告">被告</option>
+                                <option value="告訴人">告訴人</option>
+                                <option value="原告">原告</option>
+                                <option value="相對人">相對人</option>
+                                <option value="被上訴人">被上訴人</option>
+                                <option value="無(不列)">無(不列)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="party2Container" class="dynamic-list">
                         <div class="dynamic-item">
-                            <input type="text" class="defendant-input" placeholder="被告姓名　住址/處所" value="李○○　住新北市板橋區縣民大道○段○○○號" oninput="updatePreview()">
+                            <input type="text" class="party2-input" placeholder="姓名　住址/送達處所" value="李○○　住新北市板橋區縣民大道○段○○○號" oninput="updatePreview()">
                         </div>
                     </div>
                     <div class="btn-mini-group">
-                        <button type="button" class="btn-mini" onclick="addParty('defendant')">➕ 增加被告</button>
-                        <button type="button" class="btn-mini" onclick="removeParty('defendant')">➖ 刪減被告</button>
+                        <button type="button" class="btn-mini" id="btnAddParty2" onclick="addParty('party2')">➕ 增加人名</button>
+                        <button type="button" class="btn-mini" id="btnRemoveParty2" onclick="removeParty('party2')">➖ 刪減人名</button>
                     </div>
                 </div>
 
@@ -364,12 +405,26 @@
                     <div class="form-group">
                         <label for="role">具狀人身分</label>
                         <select id="role" onchange="onRoleChange()">
-                            <option value="原告">原告</option>
-                            <option value="被告">被告</option>
-                            <option value="上訴人即原告">上訴人即原告</option>
-                            <option value="上訴人即被告">上訴人即被告</option>
-                            <option value="被上訴人即原告">被上訴人即原告</option>
-                            <option value="被上訴人即被告">被上訴人即被告</option>
+                            <optgroup label="民事常見">
+                                <option value="原告">原告</option>
+                                <option value="被告">被告</option>
+                                <option value="上訴人即原告">上訴人即原告</option>
+                                <option value="上訴人即被告">上訴人即被告</option>
+                                <option value="被上訴人即原告">被上訴人即原告</option>
+                                <option value="被上訴人即被告">被上訴人即被告</option>
+                                <option value="聲請人">聲請人</option>
+                                <option value="相對人">相對人</option>
+                            </optgroup>
+                            <optgroup label="刑事常見">
+                                <option value="被告">被告</option>
+                                <option value="告訴人">告訴人</option>
+                                <option value="自訴人">自訴人</option>
+                                <option value="告發人">告發人</option>
+                                <option value="告訴代理人即告訴人">告訴代理人即告訴人</option>
+                                <option value="辯護人">辯護人</option>
+                                <option value="受刑人">受刑人</option>
+                                <option value="關係人">關係人</option>
+                            </optgroup>
                         </select>
                     </div>
                     <div class="form-group">
@@ -431,11 +486,43 @@
         document.getElementById('customDate').value = "中華民國 " + rocYear + " 年 " + month + " 月 " + day + " 日";
     }
 
+    // 快捷切換狀頭名稱
+    function switchDocTitle(title) {
+        document.getElementById('docTitle').value = title;
+        if (title.includes("刑事")) {
+            document.getElementById('party1RoleSelect').value = "被告";
+            document.getElementById('party2RoleSelect').value = "告訴人";
+            document.getElementById('role').value = "被告";
+        } else {
+            document.getElementById('party1RoleSelect').value = "原告";
+            document.getElementById('party2RoleSelect').value = "被告";
+            document.getElementById('role').value = "原告";
+        }
+        onPartyRoleChange();
+        updatePreview();
+    }
+
+    // 當事人稱謂選單切換更新標籤
+    function onPartyRoleChange() {
+        const r1 = document.getElementById('party1RoleSelect').value;
+        const r2 = document.getElementById('party2RoleSelect').value;
+        document.getElementById('party1Label').innerText = r1 + "姓名與送達處所";
+        document.getElementById('party2Label').innerText = (r2 === "無(不列)" ? "對造" : r2) + "姓名與送達處所";
+        
+        document.getElementById('btnAddParty1').innerText = "➕ 增加" + r1;
+        document.getElementById('btnRemoveParty1').innerText = "➖ 刪減" + r1;
+        document.getElementById('btnAddParty2').innerText = "➕ 增加" + (r2 === "無(不列)" ? "人員" : r2);
+        document.getElementById('btnRemoveParty2').innerText = "➖ 刪減" + (r2 === "無(不列)" ? "人員" : r2);
+        
+        updatePreview();
+    }
+
     // 動態新增當事人欄位
     function addParty(type) {
-        const containerId = type === 'plaintiff' ? 'plaintiffsContainer' : 'defendantsContainer';
-        const className = type === 'plaintiff' ? 'plaintiff-input' : 'defendant-input';
-        const placeholder = type === 'plaintiff' ? '原告姓名　住址/處所' : '被告姓名　住址/處所';
+        const containerId = type === 'party1' ? 'party1Container' : 'party2Container';
+        const className = type === 'party1' ? 'party1-input' : 'party2-input';
+        const role = type === 'party1' ? document.getElementById('party1RoleSelect').value : document.getElementById('party2RoleSelect').value;
+        const placeholder = role + '姓名　住址/處所';
         
         const container = document.getElementById(containerId);
         const div = document.createElement('div');
@@ -447,7 +534,7 @@
 
     // 動態刪減當事人欄位 (至少保留一個)
     function removeParty(type) {
-        const containerId = type === 'plaintiff' ? 'plaintiffsContainer' : 'defendantsContainer';
+        const containerId = type === 'party1' ? 'party1Container' : 'party2Container';
         const container = document.getElementById(containerId);
         if (container.children.length > 1) {
             container.removeChild(container.lastElementChild);
@@ -455,24 +542,15 @@
         }
     }
 
-    // 取得所有原告清單
-    function getPlaintiffs() {
-        const inputs = document.querySelectorAll('.plaintiff-input');
+    // 取得當事人清單
+    function getPartyList(type) {
+        const className = type === 'party1' ? '.party1-input' : '.party2-input';
+        const inputs = document.querySelectorAll(className);
         const list = [];
         inputs.forEach(inp => {
             if (inp.value.trim()) list.push(inp.value.trim());
         });
-        return list.length > 0 ? list : ['○○○'];
-    }
-
-    // 取得所有被告清單
-    function getDefendants() {
-        const inputs = document.querySelectorAll('.defendant-input');
-        const list = [];
-        inputs.forEach(inp => {
-            if (inp.value.trim()) list.push(inp.value.trim());
-        });
-        return list.length > 0 ? list : ['○○○'];
+        return list;
     }
 
     // 清空表單所有欄位
@@ -480,15 +558,16 @@
         document.getElementById('court').value = "";
         document.getElementById('caseNo').value = "";
         
-        // 重設原告為單一空白輸入框
-        const pContainer = document.getElementById('plaintiffsContainer');
-        pContainer.innerHTML = '<div class="dynamic-item"><input type="text" class="plaintiff-input" placeholder="原告姓名　住址/處所" value="" oninput="updatePreview()"></div>';
+        // 重設當事人第1組為單一空白輸入框
+        const p1Role = document.getElementById('party1RoleSelect').value;
+        const p1Container = document.getElementById('party1Container');
+        p1Container.innerHTML = '<div class="dynamic-item"><input type="text" class="party1-input" placeholder="' + p1Role + '姓名　住址/處所" value="" oninput="updatePreview()"></div>';
         
-        // 重設被告為單一空白輸入框
-        const dContainer = document.getElementById('defendantsContainer');
-        dContainer.innerHTML = '<div class="dynamic-item"><input type="text" class="defendant-input" placeholder="被告姓名　住址/處所" value="" oninput="updatePreview()"></div>';
+        // 重設當事人第2組為單一空白輸入框
+        const p2Role = document.getElementById('party2RoleSelect').value;
+        const p2Container = document.getElementById('party2Container');
+        p2Container.innerHTML = '<div class="dynamic-item"><input type="text" class="party2-input" placeholder="' + p2Role + '姓名　住址/處所" value="" oninput="updatePreview()"></div>';
         
-        document.getElementById('role').value = "原告";
         document.getElementById('partyName').value = "";
         document.getElementById('content').value = "";
         document.getElementById('attachments').value = "";
@@ -497,27 +576,67 @@
         onContentInput();
     }
 
-    // 載入範例
-    function loadSample() {
-        document.getElementById('court').value = "臺灣臺北地方法院（民事○股）";
-        document.getElementById('caseNo').value = "199年度○○字第○○○○號";
-        
-        // 重設原告
-        const pContainer = document.getElementById('plaintiffsContainer');
-        pContainer.innerHTML = '<div class="dynamic-item"><input type="text" class="plaintiff-input" value="張○○　住臺北市中正區重慶南路○段○○○號" oninput="updatePreview()"></div>';
-        
-        // 重設被告
-        const dContainer = document.getElementById('defendantsContainer');
-        dContainer.innerHTML = '<div class="dynamic-item"><input type="text" class="defendant-input" value="李○○　住新北市板橋區縣民大道○段○○○號" oninput="updatePreview()"></div>';
-        
-        document.getElementById('role').value = "原告";
-        document.getElementById('partyName').value = "張○○";
-        
-        document.getElementById('content').value = 
-"一、關於對造主張原告未依約交付貨品乙節，顯與客觀事實不符。\n　　（一）原告已於民國198年5月10日委託物流公司將全部貨品送達對造工廠，此有簽收單可稽。\n　　（二）對造受領貨品後從未為瑕疵通知，依法應視為承認受領之物。\n二、對造所提出之被證三通訊紀錄，有嚴重斷章取義與造假變造之嫌，具狀人未曾為該等承諾。\n三、綜上所述，依法陳報個人意見如上，懇請 鈞院明鑒。";
+    // 載入範例 (civil / criminal)
+    function loadSample(mode = 'civil') {
+        if (mode === 'criminal') {
+            document.getElementById('docTitle').value = "刑事陳報個人意見狀";
+            document.getElementById('court').value = "臺灣臺北地方檢察署（○股）";
+            document.getElementById('caseNo').value = "199年度偵字第○○○○○號";
+            
+            document.getElementById('party1RoleSelect').value = "被告";
+            document.getElementById('party2RoleSelect').value = "告訴人";
+            onPartyRoleChange();
+            
+            const p1Container = document.getElementById('party1Container');
+            p1Container.innerHTML = '<div class="dynamic-item"><input type="text" class="party1-input" value="王○○　住臺北市大安區信義路○段○○○號" oninput="updatePreview()"></div>';
+            
+            const p2Container = document.getElementById('party2Container');
+            p2Container.innerHTML = '<div class="dynamic-item"><input type="text" class="party2-input" value="陳○○　住新北市新店區北新路○段○○○號" oninput="updatePreview()"></div>';
+            
+            document.getElementById('role').value = "被告";
+            document.getElementById('partyName').value = "王○○";
+            
+            document.getElementById('content').value = 
+"一、關於告訴人指訴具狀人涉嫌詐欺乙節，顯與客觀事實不符，具狀人絕無任何不法所有意圖與詐術行為：\n" +
+"　　（一）雙方系爭款項往來純屬民事借貸與商業投資合作，具狀人於接洽時已充分揭露營運風險，並依約按期支付分潤及利息至民國198年止，此有匯款紀錄可稽。\n" +
+"　　（二）嗣因市場商業虧損致資金周轉困難，具狀人仍持續與告訴人溝通還款方案，並非自始施用詐術或蓄意避不見面。\n" +
+"二、告訴人所指稱民國198年4月15日具狀人曾於通訊軟體承諾全額返還乙節，係截取片段對話，有嚴重斷章取義之嫌，懇請 命其提出完整前後文通訊紀錄以釐清事實真相。\n" +
+"三、具狀人願全力配合司法調查，依法陳報個人意見與相關事證如上，懇請 鈞署明鑒，賜為不起訴處分，以維權益與清白。";
 
-        document.getElementById('attachments').value = 
-"1、物流送達簽收單影本乙份。\n2、通訊軟體對話完整截圖三紙。";
+            document.getElementById('attachments').value = 
+"1、商業合約書與風險告知書影本乙份。\n" +
+"2、銀行利息與分潤匯款往來明細三紙。\n" +
+"3、通訊軟體對話完整截圖五紙。";
+        } else {
+            // 民事範例
+            document.getElementById('docTitle').value = "民事陳報個人意見狀";
+            document.getElementById('court').value = "臺灣臺北地方法院（民事○股）";
+            document.getElementById('caseNo').value = "199年度○○字第○○○○號";
+            
+            document.getElementById('party1RoleSelect').value = "原告";
+            document.getElementById('party2RoleSelect').value = "被告";
+            onPartyRoleChange();
+            
+            const p1Container = document.getElementById('party1Container');
+            p1Container.innerHTML = '<div class="dynamic-item"><input type="text" class="party1-input" value="張○○　住臺北市中正區重慶南路○段○○○號" oninput="updatePreview()"></div>';
+            
+            const p2Container = document.getElementById('party2Container');
+            p2Container.innerHTML = '<div class="dynamic-item"><input type="text" class="party2-input" value="李○○　住新北市板橋區縣民大道○段○○○號" oninput="updatePreview()"></div>';
+            
+            document.getElementById('role').value = "原告";
+            document.getElementById('partyName').value = "張○○";
+            
+            document.getElementById('content').value = 
+"一、關於對造主張原告未依約交付貨品乙節，顯與客觀事實不符。\n" +
+"　　（一）原告已於民國198年5月10日委託物流公司將全部貨品送達對造工廠，此有簽收單可稽。\n" +
+"　　（二）對造受領貨品後從未為瑕疵通知，依法應視為承認受領之物。\n" +
+"二、對造所提出之被證三通訊紀錄，有嚴重斷章取義與造假變造之嫌，具狀人未曾為該等承諾。\n" +
+"三、綜上所述，依法陳報個人意見如上，懇請 鈞院明鑒。";
+
+            document.getElementById('attachments').value = 
+"1、物流送達簽收單影本乙份。\n" +
+"2、通訊軟體對話完整截圖三紙。";
+        }
         
         initDate();
         onContentInput();
@@ -525,14 +644,15 @@
 
     function onRoleChange() {
         const role = document.getElementById('role').value;
-        const plaintiffs = getPlaintiffs();
-        const defendants = getDefendants();
+        const p1List = getPartyList('party1');
+        const p2List = getPartyList('party2');
+        const p1Role = document.getElementById('party1RoleSelect').value;
         
-        if (role.includes("原告")) {
-            const name = plaintiffs[0].split('　')[0].split(' ')[0].trim();
+        if (role.includes(p1Role) && p1List.length > 0) {
+            const name = p1List[0].split('　')[0].split(' ')[0].trim();
             if (name) document.getElementById('partyName').value = name;
-        } else {
-            const name = defendants[0].split('　')[0].split(' ')[0].trim();
+        } else if (p2List.length > 0) {
+            const name = p2List[0].split('　')[0].split(' ')[0].trim();
             if (name) document.getElementById('partyName').value = name;
         }
         updatePreview();
@@ -545,7 +665,8 @@
         const alertMsg = document.getElementById('trapMessage');
         
         const traps = [
-            { keyword: "確實有收到", reason: "偵測到「收受款項」自認，若抗辯為贈與需承擔舉證責任！" },
+            // 民事地雷
+            { keyword: "確實有收到", reason: "偵測到「收受款項/物品」自認，若抗辯為贈與需承擔舉證責任！" },
             { keyword: "有收到", reason: "偵測到可能自認收到款項或物品，請確認是否符合訴訟策略。" },
             { keyword: "簽名是我簽", reason: "偵測到「承認私文書真正」，依法將推定契約有效，需舉證遭詐欺/脅迫！" },
             { keyword: "是我簽的", reason: "偵測到「承認簽名真正」，請確認是否構成不利自認！" },
@@ -553,6 +674,14 @@
             { keyword: "有碰到", reason: "偵測到可能承認碰撞/接觸，請謹慎評估。" },
             { keyword: "有答應慢慢還", reason: "偵測到可能構成「債務承認 / 時效中斷 / 拋棄時效利益」之危險字句！" },
             { keyword: "時效", reason: "涉及時效問題，請注意是否曾陳述過不利於時效抗辯之協商過程。" },
+            // 刑事地雷
+            { keyword: "我有拿", reason: "⚠️ 刑事風險：可能構成侵占/竊盜/詐欺取財之客觀行為自認！" },
+            { keyword: "是我拿的", reason: "⚠️ 刑事風險：自認收受財物，恐陷自白爭議！" },
+            { keyword: "我有動手", reason: "⚠️ 刑事風險：自認施暴或傷害客觀行為，請改為防衛或客觀描述！" },
+            { keyword: "我有推", reason: "⚠️ 刑事風險：自認肢體接觸，可能免除告訴人舉證責任！" },
+            { keyword: "認罪", reason: "⚠️ 偵測到「認罪」字眼，請確認是否已與律師達成訴訟策略共識。" },
+            { keyword: "我知道不合法", reason: "⚠️ 刑事風險：自認具備犯罪「故意」或「違法性認識」！" },
+            // 情緒性攻擊字眼
             { keyword: "黑心律師", reason: "含有情緒性攻擊字眼，建議過濾以避免節外生枝。" },
             { keyword: "詐欺慣犯", reason: "含有情緒性攻擊字眼，建議維持客觀事實陳述。" },
             { keyword: "敗類", reason: "含有情緒性人身攻擊字眼，請予以刪除。" }
@@ -597,28 +726,41 @@
     }
 
     function escapeHtml(str) {
-        return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        return (str || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     }
 
     // 更新右側預覽 (調整順序：公鑒 -> 年月日 -> 附件 -> 具狀人)
     function updatePreview() {
-        const court = document.getElementById('court').value || "台灣○○地方法院（○股）";
-        const caseNo = document.getElementById('caseNo').value || "○○○年度○○字第○○○○號";
-        const plaintiffs = getPlaintiffs();
-        const defendants = getDefendants();
-        const role = document.getElementById('role').value || "原告";
+        const docTitle = document.getElementById('docTitle').value.trim() || "民事陳報個人意見狀";
+        const court = document.getElementById('court').value || (docTitle.includes("刑事") ? "臺灣臺北地方檢察署（○股）" : "臺灣臺北地方法院（民事○股）");
+        const caseNo = document.getElementById('caseNo').value || (docTitle.includes("刑事") ? "○○○年度偵字第○○○○○號" : "○○○年度○○字第○○○○號");
+        
+        const p1Role = document.getElementById('party1RoleSelect').value;
+        const p2Role = document.getElementById('party2RoleSelect').value;
+        const p1List = getPartyList('party1');
+        const p2List = getPartyList('party2');
+        
+        const role = document.getElementById('role').value || p1Role;
         const partyName = document.getElementById('partyName').value || "○○○";
         const content = document.getElementById('content').value;
         const attachments = document.getElementById('attachments').value.trim();
         const dateStr = document.getElementById('customDate').value;
 
-        let courtShort = court.split('（')[0].trim();
-        if (!courtShort.endsWith("法院")) courtShort = "臺灣地方法院";
+        let courtShort = court.split('（')[0].split('(')[0].trim();
+        if (!courtShort) {
+            courtShort = docTitle.includes("刑事") ? "臺灣臺北地方檢察署" : "臺灣臺北地方法院";
+        }
 
-        // 原告多行
-        const pLinesHtml = plaintiffs.map(p => "<div class='paper-line'>原告　" + escapeHtml(p) + "</div>").join('');
-        // 被告多行
-        const dLinesHtml = defendants.map(d => "<div class='paper-line'>被告　" + escapeHtml(d) + "</div>").join('');
+        // 第1組當事人多行
+        const p1DisplayList = p1List.length > 0 ? p1List : ['○○○'];
+        const p1LinesHtml = p1DisplayList.map(p => "<div class='paper-line'>" + escapeHtml(p1Role) + "　" + escapeHtml(p) + "</div>").join('');
+        
+        // 第2組當事人多行 (若選擇無不列且空白則不顯示)
+        let p2LinesHtml = "";
+        if (p2Role !== "無(不列)" || p2List.length > 0) {
+            const p2DisplayList = p2List.length > 0 ? p2List : ['○○○'];
+            p2LinesHtml = p2DisplayList.map(d => "<div class='paper-line'>" + escapeHtml(p2Role === "無(不列)" ? "對造" : p2Role) + "　" + escapeHtml(d) + "</div>").join('');
+        }
 
         let attHtml = "";
         if (attachments) {
@@ -632,12 +774,12 @@
         }
 
         const previewHtml = 
-            '<div class="paper-title">民事陳報個人意見狀</div>' +
+            '<div class="paper-title">' + escapeHtml(docTitle) + '</div>' +
             '<div class="paper-body">' +
                 '<div class="paper-line">承辦機關：' + escapeHtml(court) + '</div>' +
                 '<div class="paper-line" style="margin-bottom: 6pt;">案號：' + escapeHtml(caseNo) + '</div>' +
-                pLinesHtml +
-                '<div style="margin-bottom: 12pt;">' + dLinesHtml + '</div>' +
+                p1LinesHtml +
+                (p2LinesHtml ? '<div style="margin-bottom: 12pt;">' + p2LinesHtml + '</div>' : '<div style="margin-bottom: 12pt;"></div>') +
                 
                 '<div class="paper-line" style="font-weight: bold;">為陳報個人意見事：</div>' +
                 '<div class="paper-line" style="margin-bottom: 8pt;">具狀人即本案' + escapeHtml(role) + escapeHtml(partyName) + '，依法陳報個人意見如下：</div>' +
@@ -663,31 +805,43 @@
         document.getElementById('paperPreview').innerHTML = previewHtml;
     }
 
-    // 匯出為標準 Word 相容格式 (調整順序：公鑒 -> 年月日 -> 附件 -> 具狀人)
+    // 匯出為標準 Word 相容格式
     function exportToWord() {
+        const docTitle = document.getElementById('docTitle').value.trim() || "陳報個人意見狀";
         const caseNo = document.getElementById('caseNo').value || "書狀";
         const partyName = document.getElementById('partyName').value || "當事人";
         const safeCase = caseNo.replace(/[\/\\:*?"<>|]/g, '_');
-        const filename = "民事陳報個人意見狀_" + safeCase + "_" + partyName + ".doc";
+        const filename = docTitle + "_" + safeCase + "_" + partyName + ".doc";
 
         const court = document.getElementById('court').value;
         const caseNoVal = document.getElementById('caseNo').value;
-        const plaintiffs = getPlaintiffs();
-        const defendants = getDefendants();
+        const p1Role = document.getElementById('party1RoleSelect').value;
+        const p2Role = document.getElementById('party2RoleSelect').value;
+        const p1List = getPartyList('party1');
+        const p2List = getPartyList('party2');
         const role = document.getElementById('role').value;
         const rawContent = document.getElementById('content').value;
         const attachments = document.getElementById('attachments').value.trim();
         const dateStr = document.getElementById('customDate').value;
         
-        let courtShort = court.split('（')[0].trim();
-        if (!courtShort.endsWith("法院")) courtShort = "臺灣地方法院";
+        let courtShort = court.split('（')[0].split('(')[0].trim();
+        if (!courtShort) {
+            courtShort = docTitle.includes("刑事") ? "臺灣臺北地方檢察署" : "臺灣臺北地方法院";
+        }
 
-        // 原告與被告多行 Word 格式
-        const pLinesWord = plaintiffs.map(p => "<p>原告　" + escapeHtml(p) + "</p>").join('');
-        const dLinesWord = defendants.map((d, idx) => {
-            const isLast = idx === defendants.length - 1;
-            return "<p style='" + (isLast ? "margin-bottom:10.0pt;" : "") + "'>被告　" + escapeHtml(d) + "</p>";
-        }).join('');
+        // 第1組當事人多行 Word 格式
+        const p1DisplayList = p1List.length > 0 ? p1List : ['○○○'];
+        const p1LinesWord = p1DisplayList.map(p => "<p>" + escapeHtml(p1Role) + "　" + escapeHtml(p) + "</p>").join('');
+        
+        // 第2組當事人多行 Word 格式
+        let p2LinesWord = "";
+        if (p2Role !== "無(不列)" || p2List.length > 0) {
+            const p2DisplayList = p2List.length > 0 ? p2List : ['○○○'];
+            p2LinesWord = p2DisplayList.map((d, idx) => {
+                const isLast = idx === p2DisplayList.length - 1;
+                return "<p style='" + (isLast ? "margin-bottom:10.0pt;" : "") + "'>" + escapeHtml(p2Role === "無(不列)" ? "對造" : p2Role) + "　" + escapeHtml(d) + "</p>";
+            }).join('');
+        }
 
         // 處理內文換行與縮排
         const lines = rawContent.split('\n');
@@ -720,7 +874,7 @@
 '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">' +
 '<head>' +
 '    <meta charset="utf-8">' +
-'    <title>民事陳報個人意見狀</title>' +
+'    <title>' + escapeHtml(docTitle) + '</title>' +
 '    <!--[if gte mso 9]>' +
 '    <xml>' +
 '    <w:WordDocument>' +
@@ -758,11 +912,11 @@
 '</head>' +
 '<body lang=ZH-TW style="tab-interval:36.0pt">' +
 '<div class=Section1>' +
-'    <p class="title">民事陳報個人意見狀</p>' +
+'    <p class="title">' + escapeHtml(docTitle) + '</p>' +
 '    <p>承辦機關：' + escapeHtml(court) + '</p>' +
 '    <p style="margin-bottom:6.0pt;">案號：' + escapeHtml(caseNoVal) + '</p>' +
-     pLinesWord +
-     dLinesWord +
+     p1LinesWord +
+     p2LinesWord +
 '    <p style="font-weight:bold;">為陳報個人意見事：</p>' +
 '    <p style="margin-bottom:6.0pt;">具狀人即本案' + escapeHtml(role) + escapeHtml(partyName) + '，依法陳報個人意見如下：</p>' +
      wordContentHtml +
@@ -802,7 +956,7 @@
 
     // 頁面載入時初始化
     window.onload = function() {
-        loadSample();
+        loadSample('civil');
     };
 </script>
 
